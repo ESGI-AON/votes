@@ -24,6 +24,8 @@ func main(){
 	r := gin.Default()
 	r.GET("/user", controller.GetUser)
 	r.POST("/user", controller.CreateUser)
+	r.PUT("/user", controller.UpdateUser)
+
 	r.Run(":8080")
 
 	defer config.DB.Close()

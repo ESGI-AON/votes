@@ -28,8 +28,40 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	u.SetPassword(u.Password)
+	//u.SetBirthDate(u.DateOfBirth)
+	fmt.Println(u)
+	return
+	if u.IsValid() != nil {
+		log.Println(u.IsValid())
+		c.JSON(http.StatusBadRequest, u.IsValid())
+		return
+	}
 	config.DB.NewRecord(u)
 	config.DB.Create(&u)
 	fmt.Println(u)
+	c.JSON(http.StatusOK, u)
+}
+
+func UpdateUser(c *gin.Context) {
+	var u User
+	uuidParam := c.Query("uuid")
+	config.DB.Where("uuid = ?", uuidParam).Find(&u)
+	var updatedUser User
+	err := c.BindJSON(&updatedUser)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	if len(u.IsValid()) > 0 {
+		log.Println(u.IsValid())
+		c.JSON(http.StatusBadRequest, u.IsValid())
+		return
+	}
+	u.FirstName = updatedUser.FirstName
+	u.LastName = updatedUser.LastName
+	u.Email = updatedUser.Email
+	u.SetPassword(updatedUser.Password)
+	config.DB.Save(&u)
 	c.JSON(http.StatusOK, u)
 }

@@ -10,21 +10,22 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"github.com/votes/helpers"
 )
 
 
 type User struct {
-	ID        uint `gorm:"primary_key" json:"-"`
-	CreatedAt time.Time `gorm:"not null" json:"-"`
-	UpdatedAt time.Time `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+	ID        uint `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time `gorm:"not null" json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 	UUID uuid.UUID `gorm:"not null" json:"uuid"`
-	AccessLevel int `gorm:"not null" json:"-"`
+	AccessLevel int `gorm:"not null" json:"access_level"`
 	FirstName string `gorm:"not null" json:"first_name"`
 	LastName string `gorm:"not null" json:"last_name"`
 	Email string `gorm:"unique;not null" json:"email"`
-	Password string `gorm:"not null" json:"-"`
-	DateOfBirth time.Time `json:"-"`
+	Password string `gorm:"not null" json:"password"`
+	DateOfBirth time.Time `json:"date_of_birth,string"`
 }
 
 type UserResponse struct {
@@ -32,6 +33,7 @@ type UserResponse struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email  string `json:"email"`
+	DateOfBirth string `json:"date_of_birth"`
 }
 
 func (u User) IsValid() []error{
@@ -68,6 +70,10 @@ func (u *User) SetPassword(pwd string) {
 	u.Password = base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
+func (u *User) SetBirthDate(date string) {
+	u.DateOfBirth = helpers.StrToTime(date, "02-01-2006")
+}
+
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("UUID", uuid.New())
 	return nil
@@ -79,5 +85,42 @@ func (u User) MarshalJSON() ([]byte, error) {
 	ur.FirstName = u.FirstName
 	ur.LastName = u.LastName
 	ur.Email = u.Email
+	ur.DateOfBirth = u.DateOfBirth.Format("02-01-2006")
 	return json.Marshal(ur)
 }
+
+//func (u *User) UnmarshalJSON(data []byte) error {
+//	type Alias User
+//	aux := &struct {
+//		DateOfBirth string  `json:"date_of_birth"`
+//		*Alias
+//	}{
+//		Alias: (*Alias)(u),
+//	}
+//	fmt.Println(aux)
+//	return errors.New("test")
+//	if err := json.Unmarshal(data, &aux); err != nil {
+//		return err
+//	}
+//	//u.LastSeen = time.Unix(aux.LastSeen, 0)
+//	u.DateOfBirth, _ = time.Parse("02-01-2006", aux.DateOfBirth)
+//	return nil
+//}
+
+//func (u *User) UnmarshalJSON(data []byte) error {
+//	var rawStrings map[string]string
+//	err := json.Unmarshal(data, &rawStrings)
+//	if err != nil {
+//		return err
+//	}
+//	for k,v := range rawStrings {
+//		if strings.ToLower(k) == "dateofbirth" {
+//			t, err := time.Parse(time.RFC3339, v)
+//			if err != nil {
+//				return err
+//			}
+//			u.DateOfBirth = t
+//		}
+//	}
+//	return nil
+//}
