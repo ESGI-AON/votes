@@ -238,3 +238,17 @@ L'UUID vote est une collection d'UUID d'utilisateurs ayant voté.
 - [Docker](https://www.docker.com/)
 - [Docker image PostgreSQL](https://docs.docker.com/samples/library/postgres/)
 - [Docker image Alpine](https://docs.docker.com/samples/library/alpine/)
+
+
+## Start the project
+
+### UP
+
+```make up```
+
+### DOWN
+
+```make down```
+
+# votes
+Votes API
