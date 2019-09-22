@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"github.com/votes/helpers"
 )
 
 
@@ -25,7 +24,7 @@ type User struct {
 	LastName string `gorm:"not null" json:"last_name"`
 	Email string `gorm:"unique;not null" json:"email"`
 	Password string `gorm:"not null" json:"password"`
-	DateOfBirth time.Time `json:"date_of_birth,string"`
+	DateOfBirth time.Time `json:"birth_date"`
 }
 
 type UserResponse struct {
@@ -33,7 +32,7 @@ type UserResponse struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email  string `json:"email"`
-	DateOfBirth string `json:"date_of_birth"`
+	DateOfBirth string `json:"birth_date"`
 }
 
 func (u User) IsValid() []error{
@@ -89,38 +88,33 @@ func (u User) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ur)
 }
 
-//func (u *User) UnmarshalJSON(data []byte) error {
-//	type Alias User
-//	aux := &struct {
-//		DateOfBirth string  `json:"date_of_birth"`
-//		*Alias
-//	}{
-//		Alias: (*Alias)(u),
-//	}
-//	fmt.Println(aux)
-//	return errors.New("test")
-//	if err := json.Unmarshal(data, &aux); err != nil {
-//		return err
-//	}
-//	//u.LastSeen = time.Unix(aux.LastSeen, 0)
-//	u.DateOfBirth, _ = time.Parse("02-01-2006", aux.DateOfBirth)
-//	return nil
-//}
 
-//func (u *User) UnmarshalJSON(data []byte) error {
-//	var rawStrings map[string]string
-//	err := json.Unmarshal(data, &rawStrings)
-//	if err != nil {
-//		return err
-//	}
-//	for k,v := range rawStrings {
-//		if strings.ToLower(k) == "dateofbirth" {
-//			t, err := time.Parse(time.RFC3339, v)
-//			if err != nil {
-//				return err
-//			}
-//			u.DateOfBirth = t
-//		}
-//	}
-//	return nil
-//}
+func (u *User) UnmarshalJSON(data []byte) error {
+	var rawStrings map[string]string
+	err := json.Unmarshal(data, &rawStrings)
+	if err != nil {
+		return err
+	}
+	for k,v := range rawStrings {
+		if strings.ToLower(k) == "first_name" {
+			u.FirstName = v
+		}
+		if strings.ToLower(k) == "last_name" {
+			u.LastName = v
+		}
+		if strings.ToLower(k) == "email" {
+			u.Email = v
+		}
+		if strings.ToLower(k) == "password" {
+			u.SetPassword(v)
+		}
+		if strings.ToLower(k) == "birth_date" {
+			t, err := time.Parse("02-01-2006", v)
+			if err != nil {
+				return err
+			}
+			u.DateOfBirth = t
+		}
+	}
+	return nil
+}

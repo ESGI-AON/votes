@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/votes/config"
 	"github.com/votes/model"
@@ -28,9 +27,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	u.SetPassword(u.Password)
-	//u.SetBirthDate(u.DateOfBirth)
-	fmt.Println(u)
-	return
 	if u.IsValid() != nil {
 		log.Println(u.IsValid())
 		c.JSON(http.StatusBadRequest, u.IsValid())
@@ -38,7 +34,6 @@ func CreateUser(c *gin.Context) {
 	}
 	config.DB.NewRecord(u)
 	config.DB.Create(&u)
-	fmt.Println(u)
 	c.JSON(http.StatusOK, u)
 }
 
@@ -62,6 +57,7 @@ func UpdateUser(c *gin.Context) {
 	u.LastName = updatedUser.LastName
 	u.Email = updatedUser.Email
 	u.SetPassword(updatedUser.Password)
+	u.DateOfBirth = updatedUser.DateOfBirth
 	config.DB.Save(&u)
 	c.JSON(http.StatusOK, u)
 }
