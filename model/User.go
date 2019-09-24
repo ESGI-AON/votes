@@ -73,6 +73,7 @@ func (u *User) SetPassword(pwd string) {
 
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("UUID", uuid.New())
+	scope.SetColumn("CreatedAt", time.Now())
 	return nil
 }
 
