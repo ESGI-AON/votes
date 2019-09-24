@@ -69,9 +69,7 @@ func (u *User) SetPassword(pwd string) {
 	u.Password = base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
-func (u *User) SetBirthDate(date string) {
-	u.DateOfBirth = helpers.StrToTime(date, "02-01-2006")
-}
+
 
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("UUID", uuid.New())

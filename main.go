@@ -21,6 +21,8 @@ func main(){
 		fmt.Println(err)
 	}
 
+	config.DB.AutoMigrate(&User{})
+
 	r := gin.Default()
 	r.GET("/user", controller.GetUser)
 	r.POST("/user", controller.CreateUser)
