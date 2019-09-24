@@ -61,3 +61,11 @@ func UpdateUser(c *gin.Context) {
 	config.DB.Save(&u)
 	c.JSON(http.StatusOK, u)
 }
+
+func DeleteUser(c *gin.Context) {
+	var u User
+	uuidParam := c.Query("uuid")
+	config.DB.Where("uuid = ?", uuidParam).Find(&u)
+	config.DB.Delete(&u)
+	c.JSON(http.StatusOK, u)
+}

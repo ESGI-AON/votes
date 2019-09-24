@@ -27,6 +27,8 @@ func main(){
 	r.GET("/user", controller.GetUser)
 	r.POST("/user", controller.CreateUser)
 	r.PUT("/user", controller.UpdateUser)
+	r.DELETE("/user", controller.DeleteUser)
+
 
 	r.Run(":8080")
 
