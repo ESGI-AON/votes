@@ -1,23 +1,17 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
-	"github.com/appleboy/gin-jwt"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	"github.com/votes/config"
-	"github.com/votes/model"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/appleboy/gin-jwt"
+	"github.com/gin-gonic/gin"
 )
 
 type login struct {
-	Email string `form:"email" json:"email" binding:"required"`
+	Username string `form:"username" json:"username" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
@@ -30,20 +24,13 @@ func helloHandler(c *gin.Context) {
 }
 
 // User demo
-type User = model.User
-var err error
+type User struct {
+	UserName  string
+	FirstName string
+	LastName  string
+}
 
 func main() {
-
-	config.DB, err = gorm.Open("postgres", "host=localhost port=5432 user=root password=root dbname=govotes sslmode=disable")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	config.DB.AutoMigrate(&User{})
-
-
 	port := os.Getenv("PORT")
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -62,37 +49,31 @@ func main() {
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*User); ok {
 				return jwt.MapClaims{
-					"id": v.Email,
-					"accessLevel": v.AccessLevel,
+					"id": v.UserName,
 				}
 			}
 			return jwt.MapClaims{}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
 			var loginVals login
-			var user model.User
 			if err := c.Bind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
 			}
-			userID := loginVals.Email
+			userID := loginVals.Username
 			password := loginVals.Password
 
-			h := sha256.New()
-			h.Write([]byte(password))
-			password = base64.URLEncoding.EncodeToString(h.Sum(nil))
-			fmt.Println(userID, password)
-			fmt.Println(user)
-
-			if err := config.DB.Where("email = ? AND password = ?", userID, password).Find(&user).Error; err != nil {
-				return "", jwt.ErrFailedAuthentication
+			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
+				return &User{
+					UserName:  userID,
+					LastName:  "Bo-Yi",
+					FirstName: "Wu",
+				}, nil
 			}
-			return &User{Email:user.Email},nil
 
+			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			claims := jwt.ExtractClaims(c)
-			fmt.Println(claims)
-			if claims["accessLevel"] == 1 {
+			if v, ok := data.(string); ok && v == "admin" {
 				return true
 			}
 
@@ -104,6 +85,7 @@ func main() {
 				"message": message,
 			})
 		},
+
 		// TokenLookup is a string in the form of "<source>:<name>" that is used
 		// to extract token from the request.
 		// Optional. Default value "header:Authorization".
