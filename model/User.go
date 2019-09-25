@@ -17,7 +17,7 @@ type User struct {
 	ID        uint `gorm:"primary_key" json:"id"`
 	CreatedAt time.Time `gorm:"not null" json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"deleted_at" pg:",soft_delete"`
 	UUID uuid.UUID `gorm:"not null" json:"uuid"`
 	AccessLevel int `gorm:"not null" json:"access_level"`
 	FirstName string `gorm:"not null" json:"first_name"`
@@ -73,6 +73,7 @@ func (u *User) SetPassword(pwd string) {
 
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("UUID", uuid.New())
+	scope.SetColumn("CreatedAt", time.Now())
 	return nil
 }
 
