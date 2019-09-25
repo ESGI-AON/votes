@@ -11,6 +11,8 @@ import (
 )
 
 type User = model.User
+type Vote = model.Vote
+
 var err error
 
 func main(){
@@ -29,6 +31,12 @@ func main(){
 	r.PUT("/user", controller.UpdateUser)
 	r.DELETE("/user", controller.DeleteUser)
 
+	config.DB.AutoMigrate(&Vote{})
+
+	r.GET("/vote", controller.GetVote)
+	r.POST("/vote", controller.CreateVote)
+	r.PUT("/vote", controller.UpdateVote)
+	r.DELETE("/vote", controller.DeleteVote)
 
 	r.Run(":8080")
 
