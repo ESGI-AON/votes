@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 	"strings"
 	"time"
 )
@@ -14,7 +15,7 @@ type Vote struct {
 	UUID uuid.UUID `gorm:"not null" json:"uuid"`
 	Title     string `json:"title"`
 	Description string `json:"description"`
-	UUIDVote    []User  `json:"uuid_vote"`
+	UUIDVote    pq.StringArray  `gorm:"type:varchar(100)[]" json:"uuid_vote"`
 	StartDate   time.Time  `json:"start_date"`
 	EndDate     time.Time  `json:"end_date"`
 	CreatedAt time.Time `gorm:"not null" json:"created_at"`

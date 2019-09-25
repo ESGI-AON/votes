@@ -34,6 +34,8 @@ func CreateVote(c *gin.Context) {
 func UpdateVote(c *gin.Context) {
 	var v Vote
 	uuidParam := c.Query("uuid")
+	//TODO remove when auth is functionnal
+	jwt := c.Query("jwt")
 	config.DB.Where("uuid = ?", uuidParam).Find(&v)
 	var updatedVote Vote
 	err := c.BindJSON(&updatedVote)
@@ -42,8 +44,7 @@ func UpdateVote(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-
-
+	v.UUIDVote = append(v.UUIDVote, jwt)
 	v.StartDate = updatedVote.StartDate
 	v.EndDate = updatedVote.EndDate
 
