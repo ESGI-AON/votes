@@ -11,6 +11,8 @@ import (
 )
 
 type User = model.User
+type Vote = model.Vote
+
 var err error
 
 func main(){
@@ -21,7 +23,7 @@ func main(){
 		fmt.Println(err)
 	}
 
-	config.DB.AutoMigrate(&User{})
+	config.DB.AutoMigrate(&User{} , &Vote{})
 
 	r := gin.Default()
 	r.GET("/user", controller.GetUser)
@@ -29,6 +31,11 @@ func main(){
 	r.PUT("/user", controller.UpdateUser)
 	r.DELETE("/user", controller.DeleteUser)
 
+
+	r.GET("/vote", controller.GetVote)
+	r.POST("/vote", controller.CreateVote)
+	r.PUT("/vote", controller.UpdateVote)
+	r.DELETE("/vote", controller.DeleteVote)
 
 	r.Run(":8080")
 
