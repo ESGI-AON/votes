@@ -23,7 +23,7 @@ func main(){
 		fmt.Println(err)
 	}
 
-	config.DB.AutoMigrate(&User{})
+	config.DB.AutoMigrate(&User{} , &Vote{})
 
 	r := gin.Default()
 	r.GET("/user", controller.GetUser)
@@ -31,7 +31,6 @@ func main(){
 	r.PUT("/user", controller.UpdateUser)
 	r.DELETE("/user", controller.DeleteUser)
 
-	config.DB.AutoMigrate(&Vote{})
 
 	r.GET("/vote", controller.GetVote)
 	r.POST("/vote", controller.CreateVote)

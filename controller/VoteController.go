@@ -45,6 +45,8 @@ func UpdateVote(c *gin.Context) {
 		return
 	}
 	v.UUIDVote = append(v.UUIDVote, jwt)
+	v.Title = updatedVote.Title
+	v.Description = updatedVote.Description
 	v.StartDate = updatedVote.StartDate
 	v.EndDate = updatedVote.EndDate
 

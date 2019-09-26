@@ -14,7 +14,7 @@ type Vote struct {
 	ID        uint `gorm:"primary_key" json:"id"`
 	UUID uuid.UUID `gorm:"not null" json:"uuid"`
 	Title     string `json:"title"`
-	Description string `json:"description"`
+	Description string `json:"desc"`
 	UUIDVote    pq.StringArray  `gorm:"type:varchar(100)[]" json:"uuid_vote"`
 	StartDate   time.Time  `json:"start_date"`
 	EndDate     time.Time  `json:"end_date"`
@@ -26,7 +26,7 @@ type Vote struct {
 type VoteResponse struct {
 	UUID uuid.UUID `json:"uuid"`
 	Title       string    `json:"title"`
-	Description string    `json:"description"`
+	Description string    `json:"desc"`
 	StartDate string `json:"start_date"`
 	EndDate string `json:"end_date"`
 
@@ -59,7 +59,7 @@ func (vo *Vote) UnmarshalJSON(data []byte) error {
 		if strings.ToLower(k) == "title" {
 			vo.Title = v
 		}
-		if strings.ToLower(k) == "description" {
+		if strings.ToLower(k) == "desc" {
 			vo.Description = v
 		}
 		if strings.ToLower(k) == "start_date" {
