@@ -7,12 +7,14 @@ import (
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/votes/config"
-	"github.com/votes/model"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/votes/config"
+	"github.com/votes/controller"
+	"github.com/votes/model"
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -52,7 +54,6 @@ func main() {
 	if port == "" {
 		port = "8000"
 	}
-
 	// the jwt middleware
 	authMiddleware := &jwt.GinJWTMiddleware{
 		Realm:      "test zone",
@@ -62,7 +63,7 @@ func main() {
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*User); ok {
 				return jwt.MapClaims{
-					"id": v.Email,
+					"uuid": v.UUID,
 					"accessLevel": v.AccessLevel,
 				}
 			}
@@ -80,22 +81,20 @@ func main() {
 			h := sha256.New()
 			h.Write([]byte(password))
 			password = base64.URLEncoding.EncodeToString(h.Sum(nil))
-			fmt.Println(userID, password)
-			fmt.Println(user)
 
 			if err := config.DB.Where("email = ? AND password = ?", userID, password).Find(&user).Error; err != nil {
 				return "", jwt.ErrFailedAuthentication
 			}
-			return &User{Email:user.Email},nil
+			return &User{Email:user.Email, AccessLevel:user.AccessLevel},nil
 
 		},
+
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			claims := jwt.ExtractClaims(c)
-			fmt.Println(claims)
-			if claims["accessLevel"] == 1 {
+			fmt.Println(claims["accessLevel"], reflect.TypeOf(claims["accessLevel"]))
+			if claims["accessLevel"] == 1.00 {
 				return true
 			}
-
 			return false
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
@@ -124,10 +123,8 @@ func main() {
 	}
 
 
-
-
-
 	r.POST("/login", authMiddleware.LoginHandler)
+	r.POST("/user", controller.CreateUser)
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)

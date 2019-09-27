@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,7 +20,7 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at" pg:",soft_delete"`
 	UUID uuid.UUID `gorm:"not null" json:"uuid"`
-	AccessLevel int `gorm:"not null" json:"access_level"`
+	AccessLevel int64 `gorm:"not null" json:"access_level,string"`
 	FirstName string `gorm:"not null" json:"first_name"`
 	LastName string `gorm:"not null" json:"last_name"`
 	Email string `gorm:"unique;not null" json:"email"`
@@ -64,9 +65,39 @@ func (u User) IsValid() []error{
 }
 
 func (u *User) SetPassword(pwd string) {
+	if pwd == "" {
+		return
+	}
 	h := sha256.New()
 	h.Write([]byte(pwd))
 	u.Password = base64.URLEncoding.EncodeToString(h.Sum(nil))
+}
+
+func (u *User) SetFirstname(name string) {
+	if name != "" {
+		u.FirstName = name
+	}
+}
+
+func (u *User) SetLastname(name string) {
+	if name != "" {
+		u.LastName = name
+	}
+}
+
+func (u *User) SetEmail(email string) {
+	if email != "" {
+		u.Email = email
+	}
+}
+
+func (u *User) SetBirthDate(date time.Time) {
+	// TODO check this shit
+	defaultTime := time.Time{}
+	if date == defaultTime {
+		return
+	}
+	u.DateOfBirth = date
 }
 
 
@@ -94,6 +125,7 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	// TODO switch case instead of if
 	for k,v := range rawStrings {
 		if strings.ToLower(k) == "first_name" {
 			u.FirstName = v
@@ -113,6 +145,10 @@ func (u *User) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			u.DateOfBirth = t
+		}
+		if strings.ToLower(k) == "access_level" {
+			i, _ := strconv.ParseInt(v, 10, 64)
+			u.AccessLevel = i
 		}
 	}
 	return nil
