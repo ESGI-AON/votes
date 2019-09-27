@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/votes/config"
 	"github.com/votes/model"
@@ -13,8 +14,8 @@ type User = model.User
 
 func GetUser(c *gin.Context) {
 	var user User
-	uuidParam := c.Query("uuid")
-	config.DB.Where("uuid = ?", uuidParam).Find(&user)
+	uuid := c.Param("uuid")
+	config.DB.Where("uuid = ?", uuid).Find(&user)
 	c.JSON(http.StatusOK, user)
 }
 
@@ -26,7 +27,6 @@ func CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	u.SetPassword(u.Password)
 	if u.IsValid() != nil {
 		log.Println(u.IsValid())
 		c.JSON(http.StatusBadRequest, u.IsValid())
@@ -39,8 +39,8 @@ func CreateUser(c *gin.Context) {
 
 func UpdateUser(c *gin.Context) {
 	var u User
-	uuidParam := c.Query("uuid")
-	config.DB.Where("uuid = ?", uuidParam).Find(&u)
+	uuid := c.Param("uuid")
+	config.DB.Where("uuid = ?", uuid).Find(&u)
 	var updatedUser User
 	err := c.BindJSON(&updatedUser)
 	if err != nil {
@@ -53,9 +53,10 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, u.IsValid())
 		return
 	}
-	u.FirstName = updatedUser.FirstName
-	u.LastName = updatedUser.LastName
-	u.Email = updatedUser.Email
+	fmt.Println(updatedUser)
+	u.SetFirstname(updatedUser.FirstName)
+	u.SetLastname(updatedUser.LastName)
+	u.SetEmail(updatedUser.Email)
 	u.SetPassword(updatedUser.Password)
 	u.DateOfBirth = updatedUser.DateOfBirth
 	config.DB.Save(&u)
@@ -64,8 +65,8 @@ func UpdateUser(c *gin.Context) {
 
 func DeleteUser(c *gin.Context) {
 	var u User
-	uuidParam := c.Query("uuid")
-	config.DB.Where("uuid = ?", uuidParam).Find(&u)
+	uuid := c.Param("uuid")
+	config.DB.Where("uuid = ?", uuid).Find(&u)
 	config.DB.Delete(&u)
 	c.JSON(http.StatusOK, u)
 }

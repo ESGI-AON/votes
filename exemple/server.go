@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	jwt "github.com/appleboy/gin-jwt"
+	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -13,21 +13,29 @@ import (
 	"github.com/votes/model"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
 	"time"
 )
-
 
 type login struct {
 	Email string `form:"email" json:"email" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
-type User = model.User
-type Vote = model.Vote
 
+func helloHandler(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	c.JSON(200, gin.H{
+		"userID": claims["id"],
+		"text":   "Hello World.",
+	})
+}
+
+// User demo
+type User = model.User
 var err error
 
-func main(){
+func main() {
 
 	config.DB, err = gorm.Open("postgres", "host=localhost port=5432 user=root password=root dbname=govotes sslmode=disable")
 
@@ -35,12 +43,18 @@ func main(){
 		fmt.Println(err)
 	}
 
-	config.DB.AutoMigrate(&User{} , &Vote{})
+	config.DB.AutoMigrate(&User{})
 
-	r := gin.Default()
+
+	port := os.Getenv("PORT")
+	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
+	if port == "" {
+		port = "8000"
+	}
+	// the jwt middleware
 	authMiddleware := &jwt.GinJWTMiddleware{
 		Realm:      "test zone",
 		Key:        []byte("secret key"),
@@ -71,9 +85,10 @@ func main(){
 			if err := config.DB.Where("email = ? AND password = ?", userID, password).Find(&user).Error; err != nil {
 				return "", jwt.ErrFailedAuthentication
 			}
-			return &user,nil
+			return &User{Email:user.Email, AccessLevel:user.AccessLevel},nil
 
 		},
+
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			claims := jwt.ExtractClaims(c)
 			fmt.Println(claims["accessLevel"], reflect.TypeOf(claims["accessLevel"]))
@@ -88,25 +103,28 @@ func main(){
 				"message": message,
 			})
 		},
+		// TokenLookup is a string in the form of "<source>:<name>" that is used
+		// to extract token from the request.
+		// Optional. Default value "header:Authorization".
+		// Possible values:
+		// - "header:<name>"
+		// - "query:<name>"
+		// - "cookie:<name>"
 		TokenLookup: "header: Authorization, query: token, cookie: jwt",
+		// TokenLookup: "query:token",
+		// TokenLookup: "cookie:token",
+
+		// TokenHeadName is a string in the header. Default value is "Bearer"
 		TokenHeadName: "Bearer",
+
+		// TimeFunc provides the current time. You can override it to use another time value.
+		// This is useful for testing or if your server uses a different time zone than your tokens.
 		TimeFunc: time.Now,
 	}
 
 
-	// AUTH
 	r.POST("/login", authMiddleware.LoginHandler)
-	// USER
-	r.GET("/user/:uuid", controller.GetUser)
 	r.POST("/user", controller.CreateUser)
-	r.PUT("/user/:uuid", controller.UpdateUser)
-	r.DELETE("/user/:uuid", controller.DeleteUser)
-  // VOTES
-  r.GET("/vote", controller.GetVote)
-	r.POST("/vote", controller.CreateVote)
-	r.PUT("/vote", controller.UpdateVote)
-	r.DELETE("/vote", controller.DeleteVote)
-
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		claims := jwt.ExtractClaims(c)
@@ -114,7 +132,14 @@ func main(){
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
-	if err := http.ListenAndServe(":8000", r); err != nil {
+	auth := r.Group("/auth")
+	auth.Use(authMiddleware.MiddlewareFunc())
+	{
+		auth.GET("/hello", helloHandler)
+		auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	}
+
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}
 }
