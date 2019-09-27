@@ -25,7 +25,8 @@ type User struct {
 	LastName string `gorm:"not null" json:"last_name"`
 	Email string `gorm:"unique;not null" json:"email"`
 	Password string `gorm:"not null" json:"password"`
-	DateOfBirth time.Time `json:"birth_date"`
+	DateOfBirth time.Time `json:"birth_date" validate:"min=18"`
+
 }
 
 type UserResponse struct {
@@ -57,6 +58,7 @@ func (u User) IsValid() []error{
 	if len(lastname) < 2 {
 		errs = append(errs, errors.New("LastName must be at least 2 characters"))
 	}
+
 	// TODO compare dates to check if > 18
 	if len(errs) > 0 {
 		return errs

@@ -23,6 +23,8 @@ type login struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 type User = model.User
+type Vote = model.Vote
+
 var err error
 
 func main(){
@@ -33,7 +35,7 @@ func main(){
 		fmt.Println(err)
 	}
 
-	config.DB.AutoMigrate(&User{})
+	config.DB.AutoMigrate(&User{} , &Vote{})
 
 	r := gin.Default()
 	r.Use(gin.Logger())
@@ -99,6 +101,11 @@ func main(){
 	r.POST("/user", controller.CreateUser)
 	r.PUT("/user/:uuid", controller.UpdateUser)
 	r.DELETE("/user/:uuid", controller.DeleteUser)
+  // VOTES
+  r.GET("/vote", controller.GetVote)
+	r.POST("/vote", controller.CreateVote)
+	r.PUT("/vote", controller.UpdateVote)
+	r.DELETE("/vote", controller.DeleteVote)
 
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
