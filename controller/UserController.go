@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	googleUUID "github.com/google/uuid"
 	"github.com/votes/config"
 	"github.com/votes/model"
 	"log"
@@ -25,7 +26,6 @@ func CreateUser(c *gin.Context) {
 	err := c.BindJSON(&u)
 	claims := jwt.ExtractClaims(c)
 	var accessLevel int = int(claims["accessLevel"].(float64))
-	fmt.Println(accessLevel, u.AccessLevel)
 	if accessLevel == 0 && u.AccessLevel == 1 {
 		c.JSON(http.StatusUnauthorized, "You need to be an admin to create an admin")
 		return
@@ -51,6 +51,13 @@ func UpdateUser(c *gin.Context) {
 	config.DB.Where("uuid = ?", uuid).Find(&u)
 	var updatedUser User
 	err := c.BindJSON(&updatedUser)
+	claims := jwt.ExtractClaims(c)
+	var accessLevel int = int(claims["accessLevel"].(float64))
+	jwtUUID, err :=  googleUUID.Parse(fmt.Sprintf("%v", claims["uuid"]))
+	if (u.UUID != jwtUUID) && accessLevel == 0 {
+		c.JSON(http.StatusUnauthorized, "You need to an admin to edit another user")
+		return
+	}
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, err)
