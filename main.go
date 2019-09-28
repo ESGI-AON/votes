@@ -13,6 +13,7 @@ import (
 	"github.com/votes/model"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -36,9 +37,12 @@ func main(){
 
 	config.DB.AutoMigrate(&User{} , &Vote{})
 
+	port := os.Getenv("PORT")
 	r := gin.Default()
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
+
+	if port == "" {
+		port = "8000"
+	}
 
 	authMiddleware := &jwt.GinJWTMiddleware{
 		Realm:      "test zone",
@@ -117,7 +121,8 @@ func main(){
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
-	if err := http.ListenAndServe(":8000", r); err != nil {
+
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal(err)
 	}
 }
