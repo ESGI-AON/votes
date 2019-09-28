@@ -29,7 +29,18 @@ type VoteResponse struct {
 	Description string    `json:"desc"`
 	StartDate string `json:"start_date"`
 	EndDate string `json:"end_date"`
+}
 
+func (vo *Vote) SetTitle(title string) {
+	if title != "" {
+		vo.Title = title
+	}
+}
+
+func (vo *Vote) SetDescription(desc string) {
+	if desc != "" {
+		vo.Description = desc
+	}
 }
 
 func (vo *Vote) BeforeCreate(scope *gorm.Scope) error {
