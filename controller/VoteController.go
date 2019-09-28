@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/votes/config"
 	"github.com/votes/model"
 	"log"
 	"net/http"
+	jwt "github.com/appleboy/gin-jwt"
 )
 
 
@@ -13,7 +15,7 @@ type Vote = model.Vote
 
 func GetVote(c *gin.Context) {
 	var vote Vote
-	uuidParam := c.Query("uuid")
+	uuidParam := c.Param("uuid")
 	config.DB.Where("uuid = ?", uuidParam).Find(&vote)
 	c.JSON(http.StatusOK, vote)
 }
@@ -31,11 +33,14 @@ func CreateVote(c *gin.Context) {
 	c.JSON(http.StatusOK, v)
 }
 
-func UpdateVote(c *gin.Context) {
+func UpdateVote(c *gin.Context, ) {
 	var v Vote
-	uuidParam := c.Query("uuid")
+	uuidParam := c.Param("uuid")
 	//TODO remove when auth is functionnal
-	jwt := c.Query("jwt")
+	claims := jwt.ExtractClaims(c)
+	voterUUID := fmt.Sprintf("%v", claims["uuid"])
+	fmt.Println(claims, voterUUID)
+
 	config.DB.Where("uuid = ?", uuidParam).Find(&v)
 	var updatedVote Vote
 	err := c.BindJSON(&updatedVote)
@@ -44,9 +49,9 @@ func UpdateVote(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	v.UUIDVote = append(v.UUIDVote, jwt)
-	v.Title = updatedVote.Title
-	v.Description = updatedVote.Description
+	v.UUIDVote = append(v.UUIDVote, voterUUID)
+	v.SetTitle(updatedVote.Title)
+	v.SetDescription(updatedVote.Description)
 	v.StartDate = updatedVote.StartDate
 	v.EndDate = updatedVote.EndDate
 
@@ -56,7 +61,7 @@ func UpdateVote(c *gin.Context) {
 
 func DeleteVote(c *gin.Context) {
 	var v Vote
-	uuidParam := c.Query("uuid")
+	uuidParam := c.Param("uuid")
 	config.DB.Where("uuid = ?", uuidParam).Find(&v)
 	config.DB.Delete(&v)
 	c.JSON(http.StatusOK, v)
