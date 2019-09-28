@@ -96,16 +96,21 @@ func main(){
 
 	// AUTH
 	r.POST("/login", authMiddleware.LoginHandler)
-	// USER
-	r.GET("/user/:uuid", controller.GetUser)
-	r.POST("/user", controller.CreateUser)
-	r.PUT("/user/:uuid", controller.UpdateUser)
-	r.DELETE("/user/:uuid", controller.DeleteUser)
-  // VOTES
-  r.GET("/vote", controller.GetVote)
-	r.POST("/vote", controller.CreateVote)
-	r.PUT("/vote", controller.UpdateVote)
-	r.DELETE("/vote", controller.DeleteVote)
+
+	auth := r.Group("/")
+	auth.Use(authMiddleware.MiddlewareFunc())
+	{
+		// USER
+		auth.GET("user/:uuid", controller.GetUser)
+		auth.POST("user", controller.CreateUser)
+		auth.PUT("user/:uuid", controller.UpdateUser)
+		auth.DELETE("user/:uuid", controller.DeleteUser)
+		// VOTES
+		auth.GET("vote/:uuid", controller.GetVote)
+		auth.POST("vote", controller.CreateVote)
+		auth.PUT("vote/:uuid", controller.UpdateVote)
+		auth.DELETE("vote", controller.DeleteVote)
+	}
 
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
