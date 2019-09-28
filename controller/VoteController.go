@@ -36,7 +36,6 @@ func CreateVote(c *gin.Context) {
 func UpdateVote(c *gin.Context, ) {
 	var v Vote
 	uuidParam := c.Param("uuid")
-	//TODO remove when auth is functionnal
 	claims := jwt.ExtractClaims(c)
 	voterUUID := fmt.Sprintf("%v", claims["uuid"])
 	fmt.Println(claims, voterUUID)

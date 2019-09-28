@@ -13,7 +13,6 @@ import (
 	"github.com/votes/model"
 	"log"
 	"net/http"
-	"reflect"
 	"time"
 )
 
@@ -76,8 +75,7 @@ func main(){
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			claims := jwt.ExtractClaims(c)
-			fmt.Println(claims["accessLevel"], reflect.TypeOf(claims["accessLevel"]))
-			if claims["accessLevel"] == 1.00 {
+			if len(claims) > 0 {
 				return true
 			}
 			return false
