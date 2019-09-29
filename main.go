@@ -103,15 +103,15 @@ func main(){
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
 		// USER
-		auth.GET("user/:uuid", controller.GetUser)
-		auth.POST("user", controller.CreateUser)
-		auth.PUT("user/:uuid", controller.UpdateUser)
-		auth.DELETE("user/:uuid", controller.DeleteUser)
+		auth.GET("users/:uuid", controller.GetUser)
+		auth.POST("users", controller.CreateUser)
+		auth.PUT("users/:uuid", controller.UpdateUser)
+		auth.DELETE("users/:uuid", controller.DeleteUser)
 		// VOTES
-		auth.GET("vote/:uuid", controller.GetVote)
-		auth.POST("vote", controller.CreateVote)
-		auth.PUT("vote/:uuid", controller.UpdateVote)
-		auth.DELETE("vote", controller.DeleteVote)
+		auth.GET("votes/:uuid", controller.GetVote)
+		auth.POST("votes", controller.CreateVote)
+		auth.PUT("votes/:uuid", controller.UpdateVote)
+		auth.DELETE("votes", controller.DeleteVote)
 	}
 
 
