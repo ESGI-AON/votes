@@ -2,13 +2,35 @@ package controller
 
 import (
 	"fmt"
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/votes/config"
+	"github.com/votes/helper"
 	"github.com/votes/model"
 	"log"
 	"net/http"
-	jwt "github.com/appleboy/gin-jwt"
+	"time"
 )
+
+type GetResponse struct {
+	UUID        uuid.UUID `json:"uuid,string"`
+	Title       string    `json:"title"`
+	Description string    `json:"desc"`
+	UUIDVote    pq.StringArray `json:"uuid_votes"`
+}
+
+type PutResponse struct {
+	UUID        uuid.UUID `json:"uuid,string"`
+	Title       string    `json:"title"`
+	Description string    `json:"desc"`
+	StartDate   time.Time `json:"start_date,string"`
+	EndDate     time.Time `json:"end_date,string"`
+	UUIDVote    pq.StringArray `json:"uuid_votes"`
+}
+
+
 
 
 type Vote = model.Vote
@@ -17,12 +39,23 @@ func GetVote(c *gin.Context) {
 	var vote Vote
 	uuidParam := c.Param("uuid")
 	config.DB.Where("uuid = ?", uuidParam).Find(&vote)
-	c.JSON(http.StatusOK, vote)
+	c.JSON(http.StatusOK, GetResponse{
+		UUID:        vote.UUID,
+		Title:       vote.Title,
+		Description: vote.Description,
+		UUIDVote:    vote.UUIDVote,
+	})
 }
 
 func CreateVote(c *gin.Context) {
 	var v Vote
 	err := c.BindJSON(&v)
+	claims := jwt.ExtractClaims(c)
+	accessLevel := helper.GetAccessLevel(claims)
+	if accessLevel == 0{
+		c.JSON(http.StatusUnauthorized, "You need to be an admin to create a vote")
+		return
+	}
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, err)
@@ -37,7 +70,8 @@ func UpdateVote(c *gin.Context, ) {
 	var v Vote
 	uuidParam := c.Param("uuid")
 	claims := jwt.ExtractClaims(c)
-	voterUUID := fmt.Sprintf("%v", claims["uuid"])
+	accessLevel := helper.GetAccessLevel(claims)
+	voterUUID := helper.GetUUIDStr(claims)
 	fmt.Println(claims, voterUUID)
 
 	config.DB.Where("uuid = ?", uuidParam).Find(&v)
@@ -49,13 +83,22 @@ func UpdateVote(c *gin.Context, ) {
 		return
 	}
 	v.UUIDVote = append(v.UUIDVote, voterUUID)
-	v.SetTitle(updatedVote.Title)
-	v.SetDescription(updatedVote.Description)
+	if accessLevel == 1{
+		v.SetTitle(updatedVote.Title)
+		v.SetDescription(updatedVote.Description)
+	}
 	v.StartDate = updatedVote.StartDate
 	v.EndDate = updatedVote.EndDate
 
 	config.DB.Save(&v)
-	c.JSON(http.StatusOK, v)
+	c.JSON(http.StatusOK, PutResponse{
+		UUID:        v.UUID,
+		Title:       v.Title,
+		Description: v.Description,
+		StartDate:   v.StartDate,
+		EndDate:     v.EndDate,
+		UUIDVote:    v.UUIDVote,
+	})
 }
 
 func DeleteVote(c *gin.Context) {
