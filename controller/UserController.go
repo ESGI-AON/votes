@@ -3,12 +3,12 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	googleUUID "github.com/google/uuid"
 	"github.com/votes/config"
 	"github.com/votes/model"
 	"log"
 	"net/http"
 	jwt "github.com/appleboy/gin-jwt"
+	"github.com/votes/helper"
 )
 
 
@@ -25,7 +25,7 @@ func CreateUser(c *gin.Context) {
 	var u User
 	err := c.BindJSON(&u)
 	claims := jwt.ExtractClaims(c)
-	var accessLevel int = int(claims["accessLevel"].(float64))
+	accessLevel := helper.GetAccessLevel(claims)
 	if accessLevel == 0 && u.AccessLevel == 1 {
 		c.JSON(http.StatusUnauthorized, "You need to be an admin to create an admin")
 		return
@@ -52,8 +52,8 @@ func UpdateUser(c *gin.Context) {
 	var updatedUser User
 	err := c.BindJSON(&updatedUser)
 	claims := jwt.ExtractClaims(c)
-	var accessLevel int = int(claims["accessLevel"].(float64))
-	jwtUUID, err :=  googleUUID.Parse(fmt.Sprintf("%v", claims["uuid"]))
+	accessLevel := helper.GetAccessLevel(claims)
+	jwtUUID :=  helper.GetUUID(claims)
 	if (u.UUID != jwtUUID) && accessLevel == 0 {
 		c.JSON(http.StatusUnauthorized, "You need to an admin to edit another user")
 		return
@@ -81,6 +81,12 @@ func UpdateUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	var u User
 	uuid := c.Param("uuid")
+	claims := jwt.ExtractClaims(c)
+	accessLevel := helper.GetAccessLevel(claims)
+	if accessLevel == 0 {
+		c.JSON(http.StatusUnauthorized, "You need to be an admin to delete a user")
+		return
+	}
 	config.DB.Where("uuid = ?", uuid).Find(&u)
 	config.DB.Delete(&u)
 	c.JSON(http.StatusOK, u)
