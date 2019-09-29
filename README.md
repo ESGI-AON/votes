@@ -14,7 +14,7 @@ git clone https://github.com/ESGI-AON/votes.git
 
 ```make up```
 
-###Install  dependencies
+### Install  dependencies
 
 ```
 make install
