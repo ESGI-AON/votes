@@ -5,4 +5,5 @@ down:
 	docker-compose down
 
 install:
-	go get -u ./...
+	go mod init
+	go get ./
