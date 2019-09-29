@@ -1,5 +1,31 @@
 # API de vote
 
+## Start the project
+## Installation
+
+- Clone project into your `$GOPATH`
+
+```
+git clone https://github.com/ESGI-AON/votes.git
+```
+
+
+### UP
+
+```make up```
+
+###Install  dependencies
+
+```
+make install
+```
+
+
+
+### DOWN
+
+```make down```
+
 ## Contexte
 
 Après le Brexit l'Europe a pris un coup dans l'aile politiquement et économiquement.
@@ -240,15 +266,7 @@ L'UUID vote est une collection d'UUID d'utilisateurs ayant voté.
 - [Docker image Alpine](https://docs.docker.com/samples/library/alpine/)
 
 
-## Start the project
 
-### UP
-
-```make up```
-
-### DOWN
-
-```make down```
 
 # votes
 Votes API

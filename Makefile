@@ -3,3 +3,6 @@ up:
 
 down:
 	docker-compose down
+
+install:
+	go get -u ./...
