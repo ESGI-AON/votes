@@ -24,6 +24,10 @@ func GetUser(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var u User
 	err := c.BindJSON(&u)
+	if u.FirstName == "" || u.LastName == "" || u.Password == "" {
+		c.JSON(http.StatusBadRequest, "Firstname, Lastname, Password are required")
+		return
+	}
 	claims := jwt.ExtractClaims(c)
 	accessLevel := helper.GetAccessLevel(claims)
 	if accessLevel == 0 && u.AccessLevel == 1 {
