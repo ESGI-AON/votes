@@ -15,18 +15,18 @@ import (
 )
 
 type GetResponse struct {
-	UUID        uuid.UUID `json:"uuid,string"`
-	Title       string    `json:"title"`
-	Description string    `json:"desc"`
+	UUID        uuid.UUID      `json:"uuid,string"`
+	Title       string         `json:"title"`
+	Description string         `json:"desc"`
 	UUIDVote    pq.StringArray `json:"uuid_votes"`
 }
 
 type PutResponse struct {
-	UUID        uuid.UUID `json:"uuid,string"`
-	Title       string    `json:"title"`
-	Description string    `json:"desc"`
-	StartDate   time.Time `json:"start_date,string"`
-	EndDate     time.Time `json:"end_date,string"`
+	UUID        uuid.UUID      `json:"uuid,string"`
+	Title       string         `json:"title"`
+	Description string         `json:"desc"`
+	StartDate   time.Time      `json:"start_date,string"`
+	EndDate     time.Time      `json:"end_date,string"`
 	UUIDVote    pq.StringArray `json:"uuid_votes"`
 }
 
@@ -38,7 +38,6 @@ func Contains(a []string, x string) bool {
 	}
 	return false
 }
-
 
 type Vote = model.Vote
 
@@ -61,6 +60,10 @@ func CreateVote(c *gin.Context) {
 	accessLevel := helper.GetAccessLevel(claims)
 	if accessLevel == 0{
 		c.JSON(http.StatusUnauthorized, "You need to be an admin to create a vote")
+		return
+	}
+	if v.Description == "" || v.Title == ""{
+		c.JSON(http.StatusBadRequest, "You need to fill Title and description")
 		return
 	}
 	if err != nil {
@@ -92,7 +95,7 @@ func UpdateVote(c *gin.Context, ) {
 	if !Contains(v.UUIDVote, voterUUID) {
 		v.UUIDVote = append(v.UUIDVote, voterUUID)
 	}
-	if accessLevel == 1{
+	if accessLevel == 1 {
 		v.SetTitle(updatedVote.Title)
 		v.SetDescription(updatedVote.Description)
 	}

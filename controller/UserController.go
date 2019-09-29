@@ -71,8 +71,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	if len(u.IsValid()) > 0 {
-		log.Println(u.IsValid())
-		c.JSON(http.StatusBadRequest, u.IsValid())
+		strErrors := make([]string, len(u.IsValid()))
+		for i, err := range u.IsValid() {
+			strErrors[i] = err.Error()
+		}
+		c.JSON(http.StatusBadRequest, strErrors)
 		return
 	}
 	fmt.Println(updatedUser)
