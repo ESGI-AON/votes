@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 
@@ -37,6 +38,15 @@ type UserResponse struct {
 	DateOfBirth string `json:"birth_date"`
 }
 
+func IsLetter(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
 func (u User) IsValid() []error{
 	var errs []error
 	firstname := strings.Trim(u.FirstName, " ")
@@ -57,6 +67,12 @@ func (u User) IsValid() []error{
 	}
 	if len(lastname) < 2 {
 		errs = append(errs, errors.New("LastName must be at least 2 characters"))
+	}
+	if !IsLetter(firstname) {
+		errs = append(errs, errors.New("Firstname contains a number"))
+	}
+	if !IsLetter(lastname) {
+		errs = append(errs, errors.New("Lastname contains a number"))
 	}
 
 	// TODO compare dates to check if > 18
