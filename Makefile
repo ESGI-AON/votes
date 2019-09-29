@@ -1,5 +1,6 @@
 up:
 	docker-compose up --build
+	go run main.go
 
 down:
 	docker-compose down
