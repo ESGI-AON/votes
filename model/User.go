@@ -7,11 +7,11 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/votes/helper"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 )
 
 
@@ -38,62 +38,7 @@ type UserResponse struct {
 	DateOfBirth string `json:"birth_date"`
 }
 
-func IsLetter(s string) bool {
-	for _, r := range s {
-		if !unicode.IsLetter(r) {
-			return false
-		}
-	}
-	return true
-}
-
-func diff(a, b time.Time) (year, month, day, hour, min, sec int) {
-	if a.Location() != b.Location() {
-		b = b.In(a.Location())
-	}
-	if a.After(b) {
-		a, b = b, a
-	}
-	y1, M1, d1 := a.Date()
-	y2, M2, d2 := b.Date()
-
-	h1, m1, s1 := a.Clock()
-	h2, m2, s2 := b.Clock()
-
-	year = int(y2 - y1)
-	month = int(M2 - M1)
-	day = int(d2 - d1)
-	hour = int(h2 - h1)
-	min = int(m2 - m1)
-	sec = int(s2 - s1)
-
-	// Normalize negative values
-	if sec < 0 {
-		sec += 60
-		min--
-	}
-	if min < 0 {
-		min += 60
-		hour--
-	}
-	if hour < 0 {
-		hour += 24
-		day--
-	}
-	if day < 0 {
-		// days in month:
-		t := time.Date(y1, M1, 32, 0, 0, 0, 0, time.UTC)
-		day += 32 - t.Day()
-		month--
-	}
-	if month < 0 {
-		month += 12
-		year--
-	}
-
-	return
-}
-
+// check if a user is valid
 func (u User) IsValid() []error{
 	var errs []error
 	firstname := strings.Trim(u.FirstName, " ")
@@ -115,14 +60,14 @@ func (u User) IsValid() []error{
 	if len(lastname) < 2 {
 		errs = append(errs, errors.New("LastName must be at least 2 characters"))
 	}
-	if !IsLetter(firstname) {
+	if !helper.IsLetter(firstname) {
 		errs = append(errs, errors.New("Firstname contains a number"))
 	}
-	if !IsLetter(lastname) {
+	if !helper.IsLetter(lastname) {
 		errs = append(errs, errors.New("Lastname contains a number"))
 	}
-	
-	year, _, _, _, _, _ := diff(u.DateOfBirth, time.Now())
+
+	year, _, _, _, _, _ := helper.DateDiff(u.DateOfBirth, time.Now())
 	if year < 18 {
 		errs = append(errs, errors.New("You must be 18 or more"))
 	}
@@ -132,6 +77,7 @@ func (u User) IsValid() []error{
 	return nil
 }
 
+// hash user password and set it
 func (u *User) SetPassword(pwd string) {
 	if pwd == "" {
 		return
@@ -141,18 +87,21 @@ func (u *User) SetPassword(pwd string) {
 	u.Password = base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
+// set firstname
 func (u *User) SetFirstname(name string) {
 	if name != "" {
 		u.FirstName = name
 	}
 }
 
+// set last name
 func (u *User) SetLastname(name string) {
 	if name != "" {
 		u.LastName = name
 	}
 }
 
+// set email
 func (u *User) SetEmail(email string) {
 	if email != "" {
 		u.Email = email
@@ -176,6 +125,7 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
+// marshal struct to json
 func (u User) MarshalJSON() ([]byte, error) {
 	var ur UserResponse
 	ur.UUID = u.UUID
@@ -186,7 +136,7 @@ func (u User) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ur)
 }
 
-
+// unmarshal json to user struct
 func (u *User) UnmarshalJSON(data []byte) error {
 	var rawStrings map[string]string
 	err := json.Unmarshal(data, &rawStrings)
