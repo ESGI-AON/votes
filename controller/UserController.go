@@ -2,13 +2,13 @@ package controller
 
 import (
 	"fmt"
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/votes/config"
+	"github.com/votes/helper"
 	"github.com/votes/model"
 	"log"
 	"net/http"
-	jwt "github.com/appleboy/gin-jwt"
-	"github.com/votes/helper"
 )
 
 
@@ -36,8 +36,11 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	if u.IsValid() != nil {
-		log.Println(u.IsValid())
-		c.JSON(http.StatusBadRequest, u.IsValid())
+		strErrors := make([]string, len(u.IsValid()))
+		for i, err := range u.IsValid() {
+			strErrors[i] = err.Error()
+		}
+		c.JSON(http.StatusBadRequest, strErrors)
 		return
 	}
 	config.DB.NewRecord(u)
