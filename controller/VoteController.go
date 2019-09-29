@@ -30,7 +30,14 @@ type PutResponse struct {
 	UUIDVote    pq.StringArray `json:"uuid_votes"`
 }
 
-
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
 
 
 type Vote = model.Vote
@@ -82,7 +89,9 @@ func UpdateVote(c *gin.Context, ) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	v.UUIDVote = append(v.UUIDVote, voterUUID)
+	if !Contains(v.UUIDVote, voterUUID) {
+		v.UUIDVote = append(v.UUIDVote, voterUUID)
+	}
 	if accessLevel == 1{
 		v.SetTitle(updatedVote.Title)
 		v.SetDescription(updatedVote.Description)
