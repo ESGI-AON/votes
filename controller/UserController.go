@@ -14,6 +14,7 @@ import (
 
 type User = model.User
 
+// get user by uuid
 func GetUser(c *gin.Context) {
 	var user User
 	uuid := c.Param("uuid")
@@ -21,6 +22,7 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// create new user
 func CreateUser(c *gin.Context) {
 	var u User
 	err := c.BindJSON(&u)
@@ -54,6 +56,8 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, u)
 }
 
+
+// update existing user by uuid
 func UpdateUser(c *gin.Context) {
 	var u User
 	uuid := c.Param("uuid")
@@ -90,6 +94,8 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, u)
 }
 
+
+// soft delete user by uuid
 func DeleteUser(c *gin.Context) {
 	var u User
 	uuid := c.Param("uuid")

@@ -31,24 +31,28 @@ type VoteResponse struct {
 	EndDate string `json:"end_date"`
 }
 
+// set title
 func (vo *Vote) SetTitle(title string) {
 	if title != "" {
 		vo.Title = title
 	}
 }
 
+// set description
 func (vo *Vote) SetDescription(desc string) {
 	if desc != "" {
 		vo.Description = desc
 	}
 }
 
+// set uuid and created_at before creating resource
 func (vo *Vote) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("UUID", uuid.New())
 	scope.SetColumn("CreatedAt", time.Now())
 	return nil
 }
 
+// marshal struct to json
 func (vo Vote) MarshalJSON() ([]byte, error) {
 	var vr VoteResponse
 	vr.UUID = vo.UUID
@@ -60,6 +64,7 @@ func (vo Vote) MarshalJSON() ([]byte, error) {
 	return json.Marshal(vr)
 }
 
+// unmarshal json to struct
 func (vo *Vote) UnmarshalJSON(data []byte) error {
 	var rawStrings map[string]string
 	err := json.Unmarshal(data, &rawStrings)
