@@ -27,3 +27,13 @@ make run
 ### DOWN
 
 ```make down```
+
+### HOW TO TEST
+
+You can login as an admin with :
+```json
+{
+  "email": "admin@admin.com",
+  "pass": "toto"
+}
+```

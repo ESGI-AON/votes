@@ -100,11 +100,11 @@ func main(){
 	r.POST("/login", authMiddleware.LoginHandler)
 
 	auth := r.Group("/")
-	auth.POST("users", controller.CreateUser)
 	auth.Use(authMiddleware.MiddlewareFunc())
 	{
 		// USER
 		auth.GET("users/:uuid", controller.GetUser)
+		auth.POST("users", controller.CreateUser)
 		auth.PUT("users/:uuid", controller.UpdateUser)
 		auth.DELETE("users/:uuid", controller.DeleteUser)
 		// VOTES
