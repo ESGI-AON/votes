@@ -9,16 +9,32 @@
 git clone https://github.com/ESGI-AON/votes.git
 ```
 
-
-### UP
-
-```make up```
-
 ### Install  dependencies
 
 ```
 make install
 ```
+
+### UP
+
+```
+make up
+```
+### RUN
+```
+make run
+```
+
+### STOP
+```
+make down
+```
+
+
+
+
+
+
 
 
 
