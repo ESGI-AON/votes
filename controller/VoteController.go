@@ -112,11 +112,3 @@ func UpdateVote(c *gin.Context, ) {
 		UUIDVote:    v.UUIDVote,
 	})
 }
-
-func DeleteVote(c *gin.Context) {
-	var v Vote
-	uuidParam := c.Param("uuid")
-	config.DB.Where("uuid = ?", uuidParam).Find(&v)
-	config.DB.Delete(&v)
-	c.JSON(http.StatusOK, v)
-}

@@ -111,7 +111,6 @@ func main(){
 		auth.GET("votes/:uuid", controller.GetVote)
 		auth.POST("votes", controller.CreateVote)
 		auth.PUT("votes/:uuid", controller.UpdateVote)
-		auth.DELETE("votes", controller.DeleteVote)
 	}
 
 
