@@ -99,8 +99,8 @@ func UpdateVote(c *gin.Context, ) {
 		v.SetTitle(updatedVote.Title)
 		v.SetDescription(updatedVote.Description)
 	}
-	v.StartDate = updatedVote.StartDate
-	v.EndDate = updatedVote.EndDate
+	v.SetStartDate(updatedVote.StartDate)
+	v.SetEndDate(updatedVote.EndDate)
 
 	config.DB.Save(&v)
 	c.JSON(http.StatusOK, PutResponse{

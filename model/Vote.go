@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
@@ -27,8 +28,6 @@ type VoteResponse struct {
 	UUID uuid.UUID `json:"uuid"`
 	Title       string    `json:"title"`
 	Description string    `json:"desc"`
-	StartDate string `json:"start_date"`
-	EndDate string `json:"end_date"`
 }
 
 // set title
@@ -52,14 +51,31 @@ func (vo *Vote) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
+func (vo *Vote) SetStartDate(date time.Time) {
+	defaultTime := time.Time{}
+	fmt.Println(defaultTime == date)
+	if date == defaultTime {
+		return
+	}
+	vo.StartDate = date
+}
+
+func (vo *Vote) SetEndDate(date time.Time) {
+	defaultTime := time.Time{}
+	if date == defaultTime {
+		return
+	}
+	vo.EndDate = date
+}
+
 // marshal struct to json
 func (vo Vote) MarshalJSON() ([]byte, error) {
 	var vr VoteResponse
 	vr.UUID = vo.UUID
 	vr.Title = vo.Title
 	vr.Description = vo.Description
-	vr.StartDate = vo.StartDate.Format("02-01-2006")
-	vr.EndDate = vo.EndDate.Format("02-01-2006")
+	//vr.StartDate = vo.StartDate.Format("02-01-2006")
+	//vr.EndDate = vo.EndDate.Format("02-01-2006")
 
 	return json.Marshal(vr)
 }

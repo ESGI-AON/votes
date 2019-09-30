@@ -43,29 +43,41 @@ func (u User) IsValid() []error{
 	var errs []error
 	firstname := strings.Trim(u.FirstName, " ")
 	lastname := strings.Trim(u.LastName, " ")
-	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-	if !re.MatchString(u.Email) {
-		errs = append(errs, errors.New("Email address is not valid"))
+	if firstname != "" {
+		if strings.Contains(firstname, " "){
+			errs = append(errs, errors.New("FirstName can't have spaces"))
+		}
+		if len(firstname) < 2 {
+			errs = append(errs, errors.New("FirstName must be at least 2 characters"))
+		}
+		if !helper.IsLetter(firstname) {
+			errs = append(errs, errors.New("Firstname contains a number"))
+		}
 	}
-	if strings.Contains(firstname, " "){
-		errs = append(errs, errors.New("FirstName can't have spaces"))
+
+	if lastname != ""{
+		if strings.Contains(lastname, " "){
+			errs = append(errs, errors.New("LastName can't have spaces"))
+		}
+
+		if len(lastname) < 2 {
+			errs = append(errs, errors.New("LastName must be at least 2 characters"))
+		}
+
+		if !helper.IsLetter(lastname) {
+			errs = append(errs, errors.New("Lastname contains a number"))
+		}
 	}
-	if strings.Contains(lastname, " "){
-		errs = append(errs, errors.New("LastName can't have spaces"))
+
+	if u.Email != "" {
+		re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+		if !re.MatchString(u.Email) {
+			errs = append(errs, errors.New("Email address is not valid"))
+		}
 	}
-	if len(firstname) < 2 {
-		errs = append(errs, errors.New("FirstName must be at least 2 characters"))
-	}
-	if len(lastname) < 2 {
-		errs = append(errs, errors.New("LastName must be at least 2 characters"))
-	}
-	if !helper.IsLetter(firstname) {
-		errs = append(errs, errors.New("Firstname contains a number"))
-	}
-	if !helper.IsLetter(lastname) {
-		errs = append(errs, errors.New("Lastname contains a number"))
-	}
+
 
 	year, _, _, _, _, _ := helper.DateDiff(u.DateOfBirth, time.Now())
 	if year < 18 {

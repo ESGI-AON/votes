@@ -74,9 +74,9 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	if len(u.IsValid()) > 0 {
-		strErrors := make([]string, len(u.IsValid()))
-		for i, err := range u.IsValid() {
+	if len(updatedUser.IsValid()) > 0 {
+		strErrors := make([]string, len(updatedUser.IsValid()))
+		for i, err := range updatedUser.IsValid() {
 			strErrors[i] = err.Error()
 		}
 		c.JSON(http.StatusBadRequest, strErrors)
@@ -87,7 +87,7 @@ func UpdateUser(c *gin.Context) {
 	u.SetLastname(updatedUser.LastName)
 	u.SetEmail(updatedUser.Email)
 	u.SetPassword(updatedUser.Password)
-	u.DateOfBirth = updatedUser.DateOfBirth
+	u.SetBirthDate(updatedUser.DateOfBirth)
 	config.DB.Save(&u)
 	c.JSON(http.StatusOK, u)
 }
