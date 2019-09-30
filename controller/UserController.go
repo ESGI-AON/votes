@@ -29,10 +29,12 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	claims := jwt.ExtractClaims(c)
-	accessLevel := helper.GetAccessLevel(claims)
-	if accessLevel == 0 && u.AccessLevel == 1 {
-		c.JSON(http.StatusUnauthorized, "You need to be an admin to create an admin")
-		return
+	if len(claims) > 0 {
+		accessLevel := helper.GetAccessLevel(claims)
+		if accessLevel == 0 && u.AccessLevel == 1 {
+			c.JSON(http.StatusUnauthorized, "You need to be an admin to create an admin")
+			return
+		}
 	}
 	if err != nil {
 		log.Println(err)
