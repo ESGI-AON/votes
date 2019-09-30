@@ -90,6 +90,11 @@ func main(){
 				"message": message,
 			})
 		},
+		LoginResponse: func(c *gin.Context, i int, token string, i2 time.Time) {
+			c.JSON(http.StatusOK, gin.H{
+				"jwt": token,
+			})
+		},
 		TokenLookup: "header: Authorization, query: token, cookie: jwt",
 		TokenHeadName: "Bearer",
 		TimeFunc: time.Now,
