@@ -38,4 +38,4 @@ create table if not exists votes
 alter table votes owner to root;
 
 
-INSERT INTO users (id, created_at, updated_at, deleted_at, uuid, access_level, first_name, last_name, email, password, date_of_birth) VALUES (1, '2019-09-18 20:52:01.529000', null, null, '584cbd52-8f2a-46b6-8007-8988d3de1f1b', 1, 'admin', 'admin', 'admin@admin.com', 'MfemXjFVhqwZi9eYtmKc5JA9CJlHbVdBqfMuLlIbamY=', '1991-09-29 20:54:50.297000');
+INSERT INTO users (created_at, updated_at, deleted_at, uuid, access_level, first_name, last_name, email, password, date_of_birth) VALUES ('2019-09-18 20:52:01.529000', null, null, '584cbd52-8f2a-46b6-8007-8988d3de1f1b', 1, 'admin', 'admin', 'admin@admin.com', 'MfemXjFVhqwZi9eYtmKc5JA9CJlHbVdBqfMuLlIbamY=', '1991-09-29 20:54:50.297000');
