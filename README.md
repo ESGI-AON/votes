@@ -30,7 +30,7 @@ make run
 
 ### HOW TO TEST
 
-You can login as an admin with :
+You can login in POST /login as an admin with :
 ```json
 {
   "email": "admin@admin.com",
